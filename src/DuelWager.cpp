@@ -16,6 +16,7 @@
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "BanMgr.h"
 #include "PlayerScript.h"
 #include "SharedDefines.h"
 #include "Unit.h"
@@ -1758,32 +1759,41 @@ public:
             if (type == DUEL_INTERRUPTED)
                 return;
 
-            PendingEquipmentDeath deathRecord;
-            deathRecord.WinnerGuid = winner->GetGUID();
-            deathRecord.LoserGuid = loser->GetGUID();
-            deathRecord.WinnerAccount = GetDuelPlayerAccountId(winner);
-            deathRecord.WinnerName = winner->GetName();
-            deathRecord.WinnerRace = uint8(winner->getRace());
-            deathRecord.WinnerClass = uint8(winner->getClass());
-            deathRecord.WinnerLevel = uint8(winner->GetLevel());
-            PendingEquipmentDeaths[loser->GetGUID()] = std::move(deathRecord);
+            std::string const winnerName = winner->GetName();
+            std::string const loserName = loser->GetName();
+            uint8 const winnerLevel = winner->GetLevel();
+            uint8 const loserLevel = loser->GetLevel();
 
-            // The duel system leaves the loser alive at 1 HP just before this hook runs.
-            // KillPlayer() alone transitions straight to DeathState::Corpse and skips the
-            // DeathState::JustDied step that zeroes health, which would leave the loser stuck
-            // half-dead. Force the proper death sequence so they die instantly and can release.
+            // 1. Epic Global Server Announcement
+            std::string const globalAnnouncement = Acore::StringFormat(
+                "|cFFFF0000[Mak'gora]|r |cFFFFD100{}|r (Nivel {}) ha salido victorioso en un Duelo a Muerte contra |cFFFFD100{}|r (Nivel {})! El personaje de |cFFFFFFFF{}|r ha caido para siempre.",
+                winnerName, winnerLevel, loserName, loserLevel, loserName);
+            sWorld->SendServerMessage(SERVER_MSG_STRING, globalAnnouncement.c_str());
+
+            // 2. Kill the loser completely
             if (loser->IsAlive())
             {
                 loser->SetHealth(0);
                 loser->setDeathState(DeathState::JustDied);
                 loser->KillPlayer();
             }
-
-            // A death-duel loss is unconditional: strip any self-resurrect
-            // (soulstone, Reincarnation/ankh, etc.) so the loser cannot pop back
-            // up and skip dropping their gear. They must release spirit, which is
-            // what builds the lootable skeleton.
             loser->SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
+
+            // 3. Record Mak'gora history to Database
+            CharacterDatabase.Execute(Acore::StringFormat(
+                "INSERT INTO `Custom`.`duel_makgora_history` "
+                "(`duration_ms`, `winner_guid`, `winner_account`, `winner_name`, `winner_race`, `winner_class`, `winner_level`, "
+                "`loser_guid`, `loser_account`, `loser_name`, `loser_race`, `loser_class`, `loser_level`, "
+                "`map_id`, `zone_id`, `area_id`, `position_x`, `position_y`, `position_z`, `orientation`, `status`) "
+                "VALUES ({}, {}, {}, '{}', {}, {}, {}, {}, {}, '{}', {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, 'banned_and_locked')",
+                durationMs,
+                winner->GetGUID().GetCounter(), GetDuelPlayerAccountId(winner), winnerName, uint8(winner->getRace()), uint8(winner->getClass()), winnerLevel,
+                loser->GetGUID().GetCounter(), GetDuelPlayerAccountId(loser), loserName, uint8(loser->getRace()), uint8(loser->getClass()), loserLevel,
+                winner->GetMapId(), winner->GetZoneId(), winner->GetAreaId(),
+                winner->GetPositionX(), winner->GetPositionY(), winner->GetPositionZ(), winner->GetOrientation()));
+
+            // 4. Permanently ban the character and kick player from server
+            sBan->BanCharacter(loserName, "", "Derrotado en Duelo a Muerte (Mak'gora)", "Mak'gora");
 
             return;
         }
