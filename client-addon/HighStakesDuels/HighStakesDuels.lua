@@ -3,7 +3,7 @@ local SSDuelWager = CreateFrame("Frame")
 local SERVER_PREFIX = "HCDW"
 local POPUP_AMOUNT = "SERVERSYSTEMS_DUEL_AMOUNT_POPUP"
 local POPUP_DUEL_TYPE = "SERVERSYSTEMS_DUEL_TYPE_POPUP"
-local GOLD_ICON = "|TInterface\\MoneyFrame\\UI-GoldIcon:15:15:0:0|t"
+local GOLD_ICON = "|TInterface\\MoneyFrame\\UI-GoldIcon:16:16:0:0|t"
 local SKULL_ICON = "|TInterface\\Icons\\INV_Misc_Bone_HumanSkull_01:16:16:0:0|t"
 
 local activeRequest
@@ -15,40 +15,40 @@ local locale = GetLocale and GetLocale() or "enUS"
 local strings = {
     enUS = {
         SELECT_PLAYER = "Select a player first.",
-        AMOUNT_POPUP = "Gold duel with %s\n\n" .. GOLD_ICON .. " Gold amount:",
+        AMOUNT_POPUP = "Gold Duel with |cFFFFD100%s|r\n\n" .. GOLD_ICON .. " Enter gold amount:",
         ENTER_AMOUNT = "Enter an amount, for example 10g.",
         TARGET_NOT_FOUND = "Could not find the target player.",
-        DUEL_POPUP_GOLD = "%s has challenged you to a gold duel for %s.",
-        DUEL_POPUP_MAKGORA = SKULL_ICON .. " |cFFFF1111MAK'GORA (DEATH DUEL)|r\n\n%s has challenged you to a duel to the death!\n\n|cFFFF4444WARNING: The loser suffers permanent character death!|r",
-        TYPE_POPUP = "Select duel type with %s:",
+        DUEL_POPUP_GOLD = GOLD_ICON .. " |cFFFFD100GOLD WAGER DUEL|r\n\n|cFFFFFFFF%s|r has challenged you to a gold duel for |cFFFFD100%s|r.\n\nWinner takes both wagers!",
+        DUEL_POPUP_MAKGORA = SKULL_ICON .. " |cFFFF1111MAK'GORA (DEATH DUEL)|r\n\n|cFFFFFFFF%s|r has challenged you to a duel to the death!\n\n|cFFFF4444WARNING: The loser suffers permanent character death!|r",
+        TYPE_POPUP = "Choose duel type with |cFFFFD100%s|r:",
         TYPE_NORMAL = "Normal",
-        TYPE_MONEY = "Gold",
-        TYPE_MAKGORA = "Mak'gora (Death)",
+        TYPE_MONEY = GOLD_ICON .. " Gold",
+        TYPE_MAKGORA = SKULL_ICON .. " Mak'gora",
         TIP_NORMAL_TITLE = "Normal Duel",
-        TIP_NORMAL_BODY = "Challenge the selected player to a standard duel. No gold is wagered and nobody dies.",
-        TIP_MONEY_TITLE = "Gold Duel",
-        TIP_MONEY_BODY = "Both players wager the chosen gold amount. The winner receives both stakes. Cancelled or interrupted duels are refunded.",
+        TIP_NORMAL_BODY = "Challenge the player to a standard friendly duel. No gold is wagered and nobody dies.",
+        TIP_MONEY_TITLE = "Gold Wager Duel",
+        TIP_MONEY_BODY = "Both players wager the chosen gold amount. The winner receives both stakes. Cancelled duels are 100% refunded.",
         TIP_MAKGORA_TITLE = "Mak'gora (Death Duel)",
         TIP_MAKGORA_BODY = "High-stakes duel to the death! The loser suffers permanent character death and lockout.",
         MAKGORA_SENT = "Mak'gora duel request sent to %s.",
     },
     esES = {
         SELECT_PLAYER = "Selecciona un jugador primero.",
-        AMOUNT_POPUP = "Duelo por Oro con %s\n\n" .. GOLD_ICON .. " Cantidad en oro:",
-        ENTER_AMOUNT = "Escribe una cantidad, por ejemplo 10g.",
+        AMOUNT_POPUP = "Duelo por Oro con |cFFFFD100%s|r\n\n" .. GOLD_ICON .. " Ingresa la cantidad en oro:",
+        ENTER_AMOUNT = "Escribe una cantidad, por ejemplo 10g o 500g.",
         TARGET_NOT_FOUND = "No se pudo encontrar el jugador objetivo.",
-        DUEL_POPUP_GOLD = "%s te ha retado a un duelo de oro por %s.",
-        DUEL_POPUP_MAKGORA = SKULL_ICON .. " |cFFFF1111¡DUELO A MUERTE (MAK'GORA)!|r\n\n%s te ha retado a un duelo a muerte.\n\n|cFFFF4444¡ADVERTENCIA: El perdedor morirá de forma permanente y su personaje quedará bloqueado!|r",
-        TYPE_POPUP = "Selecciona el tipo de duelo con %s:",
+        DUEL_POPUP_GOLD = GOLD_ICON .. " |cFFFFD100DUELO POR ORO|r\n\n|cFFFFFFFF%s|r te ha retado a un duelo de oro por |cFFFFD100%s|r.\n\n¡El ganador se lleva el bote total!",
+        DUEL_POPUP_MAKGORA = SKULL_ICON .. " |cFFFF1111¡DUELO A MUERTE (MAK'GORA)!|r\n\n|cFFFFFFFF%s|r te ha retado a un duelo a muerte.\n\n|cFFFF4444¡ADVERTENCIA: El perdedor morirá de forma permanente y su personaje quedará bloqueado!|r",
+        TYPE_POPUP = "Elige el tipo de duelo con |cFFFFD100%s|r:",
         TYPE_NORMAL = "Normal",
-        TYPE_MONEY = "Oro",
-        TYPE_MAKGORA = "Mak'gora (Muerte)",
+        TYPE_MONEY = GOLD_ICON .. " Oro",
+        TYPE_MAKGORA = SKULL_ICON .. " Mak'gora",
         TIP_NORMAL_TITLE = "Duelo normal",
-        TIP_NORMAL_BODY = "Reta al jugador seleccionado a un duelo normal amistoso sin apuestas.",
+        TIP_NORMAL_BODY = "Reta al jugador a un duelo amistoso estándar sin apuestas ni riesgos.",
         TIP_MONEY_TITLE = "Duelo por Oro",
-        TIP_MONEY_BODY = "Ambos jugadores apuestan oro con la cantidad elegida. El ganador recibe ambas apuestas. Si se cancela o interrumpe, se devuelve el oro.",
+        TIP_MONEY_BODY = "Ambos jugadores apuestan la cantidad de oro elegida. El ganador recibe ambas apuestas. Si se cancela, se devuelve el oro.",
         TIP_MAKGORA_TITLE = "Mak'gora (Duelo a Muerte)",
-        TIP_MAKGORA_BODY = "¡Duelo a muerte de máximo riesgo! El perdedor muere de forma permanente y su personaje queda bloqueado.",
+        TIP_MAKGORA_BODY = "¡Duelo a muerte de máximo riesgo! El perdedor muere permanentemente y su personaje queda bloqueado.",
         MAKGORA_SENT = "Reto de Mak'gora a muerte enviado a %s.",
     }
 }
@@ -71,10 +71,10 @@ local DUEL_TYPE_TOOLTIPS = {
         return L.TIP_NORMAL_TITLE, L.TIP_NORMAL_BODY
     end,
     [2] = function()
-        return GOLD_ICON .. " " .. L.TIP_MONEY_TITLE, L.TIP_MONEY_BODY
+        return L.TIP_MONEY_TITLE, L.TIP_MONEY_BODY
     end,
     [3] = function()
-        return SKULL_ICON .. " " .. L.TIP_MAKGORA_TITLE, L.TIP_MAKGORA_BODY
+        return L.TIP_MAKGORA_TITLE, L.TIP_MAKGORA_BODY
     end,
 }
 
@@ -206,27 +206,109 @@ local function HideDuelTypeTooltip()
     end
 end
 
-local function AttachDuelTypePopupTooltips(popup)
+local function LayoutDuelTypePopup(popup)
     if not popup then
         return
     end
 
-    local buttons = {
-        popup.button1 or _G[popup:GetName() .. "Button1"],
-        popup.button2 or _G[popup:GetName() .. "Button2"],
-        popup.button3 or _G[popup:GetName() .. "Button3"],
-    }
+    -- Set wide dialogue frame for perfectly balanced 3-button layout
+    local popupWidth = 430
+    local popupHeight = 135
+    popup:SetWidth(popupWidth)
+    popup:SetHeight(popupHeight)
+
+    local textRegion = GetPopupTextRegion(popup)
+    if textRegion then
+        textRegion:ClearAllPoints()
+        textRegion:SetPoint("TOP", popup, "TOP", 0, -22)
+        textRegion:SetWidth(popupWidth - 40)
+        textRegion:SetJustifyH("CENTER")
+    end
+
+    local btn1 = popup.button1 or _G[popup:GetName() .. "Button1"]
+    local btn2 = popup.button2 or _G[popup:GetName() .. "Button2"]
+    local btn3 = popup.button3 or _G[popup:GetName() .. "Button3"]
+
+    local buttons = { btn1, btn2, btn3 }
+    local btnWidth = 124
+    local btnHeight = 26
+    local spacing = 10
+    local totalWidth = (btnWidth * 3) + (spacing * 2)
+    local startX = (popupWidth - totalWidth) / 2
 
     for index, button in ipairs(buttons) do
-        if button and not button.__SSDuelWagerHooked then
-            button.__SSDuelWagerHooked = true
-            button:HookScript("OnEnter", function(self)
-                ShowDuelTypeTooltip(self, index)
-            end)
-            button:HookScript("OnLeave", function()
-                HideDuelTypeTooltip()
-            end)
+        if button then
+            button:SetWidth(btnWidth)
+            button:SetHeight(btnHeight)
+            button:ClearAllPoints()
+
+            if index == 1 then
+                button:SetPoint("BOTTOMLEFT", popup, "BOTTOMLEFT", startX, 18)
+            else
+                button:SetPoint("LEFT", buttons[index - 1], "RIGHT", spacing, 0)
+            end
+
+            if not button.__SSDuelWagerHooked then
+                button.__SSDuelWagerHooked = true
+                button:HookScript("OnEnter", function(self)
+                    ShowDuelTypeTooltip(self, index)
+                end)
+                button:HookScript("OnLeave", function()
+                    HideDuelTypeTooltip()
+                end)
+            end
         end
+    end
+end
+
+local function LayoutAmountPopup(popup)
+    if not popup then
+        return
+    end
+
+    local popupWidth = 360
+    local popupHeight = 145
+    popup:SetWidth(popupWidth)
+    popup:SetHeight(popupHeight)
+
+    local textRegion = GetPopupTextRegion(popup)
+    if textRegion then
+        textRegion:ClearAllPoints()
+        textRegion:SetPoint("TOP", popup, "TOP", 0, -20)
+        textRegion:SetWidth(popupWidth - 30)
+        textRegion:SetJustifyH("CENTER")
+    end
+
+    local editBox = popup.editBox or _G[popup:GetName() .. "EditBox"]
+    if editBox then
+        editBox:ClearAllPoints()
+        editBox:SetPoint("CENTER", popup, "CENTER", 0, -6)
+        editBox:SetWidth(150)
+        editBox:SetHeight(22)
+        editBox:SetJustifyH("CENTER")
+    end
+
+    local btn1 = popup.button1 or _G[popup:GetName() .. "Button1"]
+    local btn2 = popup.button2 or _G[popup:GetName() .. "Button2"]
+
+    local btnWidth = 120
+    local btnHeight = 24
+    local spacing = 16
+    local totalWidth = (btnWidth * 2) + spacing
+    local startX = (popupWidth - totalWidth) / 2
+
+    if btn1 then
+        btn1:SetWidth(btnWidth)
+        btn1:SetHeight(btnHeight)
+        btn1:ClearAllPoints()
+        btn1:SetPoint("BOTTOMLEFT", popup, "BOTTOMLEFT", startX, 16)
+    end
+
+    if btn2 then
+        btn2:SetWidth(btnWidth)
+        btn2:SetHeight(btnHeight)
+        btn2:ClearAllPoints()
+        btn2:SetPoint("LEFT", btn1, "RIGHT", spacing, 0)
     end
 end
 
@@ -262,6 +344,7 @@ local function UpdateDuelPopup()
     local popup = FindDuelRequestPopup()
     local textRegion = GetPopupTextRegion(popup)
     if textRegion then
+        textRegion:SetJustifyH("CENTER")
         if activeRequest.isMakgora then
             textRegion:SetText(string.format(L.DUEL_POPUP_MAKGORA, activeRequest.challenger))
         else
@@ -340,6 +423,7 @@ StaticPopupDialogs[POPUP_AMOUNT] = {
     hideOnEscape = 1,
     preferredIndex = 3,
     OnShow = function(self)
+        LayoutAmountPopup(self)
         self.editBox:SetText("")
         self.editBox:SetFocus()
     end,
@@ -382,7 +466,7 @@ StaticPopupDialogs[POPUP_DUEL_TYPE] = {
     noCancelOnEscape = 1,
     preferredIndex = 3,
     OnShow = function(self)
-        AttachDuelTypePopupTooltips(self)
+        LayoutDuelTypePopup(self)
         EnsureDuelTypeCloseButton(self)
     end,
     OnHide = function(self)
