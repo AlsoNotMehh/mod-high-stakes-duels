@@ -1,0 +1,7 @@
+## Interface: 30300
+## Title: |cFF00FF00High-Stakes Duels|r (Gold & Mak'gora)
+## Notes: Blizzard-style in-game duel selection and gold wagering interface.
+## Author: AlsoNotMehh
+## Version: 1.0.0
+
+HighStakesDuels.lua
