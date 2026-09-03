@@ -406,7 +406,7 @@ void RefreshCorpseLoot(Loot& loot, ObjectGuid corpseGuid)
 
     loot.unlootedCount = unlootedCount;
     loot.loot_type = LOOT_CORPSE;
-    loot.suppressAchievementUpdates = true;
+    // loot.suppressAchievementUpdates = true;
     loot.sourceWorldObjectGUID = corpseGuid;
     loot.sourceGameObject = nullptr;
     loot.roundRobinPlayer.Clear();
