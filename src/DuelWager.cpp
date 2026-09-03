@@ -1068,11 +1068,11 @@ bool StartEquipmentChallenge(Player* challenger, Player* target, ChatHandler& ha
     }
 
     ChatHandler(target->GetSession()).PSendSysMessage(Tr(target,
-        "DuelWager: {} challenged you to an equipment duel. The loser will forfeit their equipped items.",
-        "DuelWager: {} te reto a un duelo por equipamiento. El perdedor perdera sus objetos equipados."),
+        "DuelWager: {} challenged you to a Mak'gora (Death Duel)! The loser will suffer permanent character death.",
+        "DuelWager: {} te reto a un duelo a muerte (Mak'gora)! El perdedor morira permanentemente."),
         challenger->GetName());
-    SendDuelWagerAddonMessage(target, Acore::StringFormat("EQUIPMENT_REQUEST\t{}", challenger->GetName()));
-    SendDuelWagerAddonMessage(challenger, Acore::StringFormat("EQUIPMENT_SENT\t{}", target->GetName()));
+    SendDuelWagerAddonMessage(target, Acore::StringFormat("MAKGORA_REQUEST\t{}", challenger->GetName()));
+    SendDuelWagerAddonMessage(challenger, Acore::StringFormat("MAKGORA_SENT\t{}", target->GetName()));
     return true;
 }
 
@@ -1280,7 +1280,7 @@ bool HandleChallengeCommand(ChatHandler* handler, char const* args)
     }
 
     std::vector<std::string> const tokens = ParseCommandTokens(args ? args : "");
-    if (tokens.size() == 2 && (StringEqualI(tokens[0], "equipment") || StringEqualI(tokens[0], "equipamiento")))
+    if (tokens.size() == 2 && (StringEqualI(tokens[0], "equipment") || StringEqualI(tokens[0], "equipamiento") || StringEqualI(tokens[0], "makgora") || StringEqualI(tokens[0], "mak'gora") || StringEqualI(tokens[0], "death") || StringEqualI(tokens[0], "muerte")))
     {
         std::string const targetName = ExtractPlayerName(tokens[1]);
         if (targetName.empty())
@@ -1300,6 +1300,7 @@ bool HandleChallengeCommand(ChatHandler* handler, char const* args)
         return true;
     }
 
+    if (tokens.size() == 2 && (StringEqualI(tokens[1], "equipment") || StringEqualI(tokens[1], "equipamiento") || StringEqualI(tokens[1], "makgora") || StringEqualI(tokens[1], "mak'gora") || StringEqualI(tokens[1], "death") || StringEqualI(tokens[1], "muerte"))) { std::string targetName = ExtractPlayerName(tokens[0]); Player* target = ObjectAccessor::FindPlayerByName(targetName, true); if (!target) { handler->PSendSysMessage(Tr(*handler, "DuelWager: {} is not online.", "DuelWager: {} no esta conectado."), targetName); return true; } StartEquipmentChallenge(challenger, target, *handler); return true; }
     if (tokens.size() != 2)
     {
         handler->SendSysMessage(Tr(*handler,
