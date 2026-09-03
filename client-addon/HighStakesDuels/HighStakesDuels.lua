@@ -3,8 +3,13 @@ local SSDuelWager = CreateFrame("Frame")
 local SERVER_PREFIX = "HCDW"
 local POPUP_AMOUNT = "SERVERSYSTEMS_DUEL_AMOUNT_POPUP"
 local POPUP_DUEL_TYPE = "SERVERSYSTEMS_DUEL_TYPE_POPUP"
-local GOLD_ICON = "|TInterface\\MoneyFrame\\UI-GoldIcon:16:16:0:0|t"
-local SKULL_ICON = "|TInterface\\Icons\\INV_Misc_Bone_HumanSkull_01:16:16:0:0|t"
+
+-- Crisp standard WoW 3.3.5a UI icons
+local SWORD_ICON = "|TInterface\\Icons\\INV_Sword_04:14:14:0:0|t"
+local GOLD_ICON = "|TInterface\\MoneyFrame\\UI-GoldIcon:14:14:0:0|t"
+local SKULL_ICON = "|TInterface\\Icons\\INV_Misc_Bone_HumanSkull_01:14:14:0:0|t"
+local BIG_GOLD_ICON = "|TInterface\\MoneyFrame\\UI-GoldIcon:18:18:0:0|t"
+local BIG_SKULL_ICON = "|TInterface\\Icons\\INV_Misc_Bone_HumanSkull_01:18:18:0:0|t"
 
 local activeRequest
 local activeDuelTypeTooltipButton
@@ -15,13 +20,13 @@ local locale = GetLocale and GetLocale() or "enUS"
 local strings = {
     enUS = {
         SELECT_PLAYER = "Select a player first.",
-        AMOUNT_POPUP = "Gold Duel with |cFFFFD100%s|r\n\n" .. GOLD_ICON .. " Enter gold amount:",
-        ENTER_AMOUNT = "Enter an amount, for example 10g.",
+        AMOUNT_POPUP = BIG_GOLD_ICON .. " Gold Duel with |cFFFFD100%s|r\n\nEnter gold amount to wager:",
+        ENTER_AMOUNT = "Enter an amount, for example 10g or 500g.",
         TARGET_NOT_FOUND = "Could not find the target player.",
-        DUEL_POPUP_GOLD = GOLD_ICON .. " |cFFFFD100GOLD WAGER DUEL|r\n\n|cFFFFFFFF%s|r has challenged you to a gold duel for |cFFFFD100%s|r.\n\nWinner takes both wagers!",
-        DUEL_POPUP_MAKGORA = SKULL_ICON .. " |cFFFF1111MAK'GORA (DEATH DUEL)|r\n\n|cFFFFFFFF%s|r has challenged you to a duel to the death!\n\n|cFFFF4444WARNING: The loser suffers permanent character death!|r",
+        DUEL_POPUP_GOLD = BIG_GOLD_ICON .. " |cFFFFD100GOLD WAGER DUEL|r\n\n|cFFFFFFFF%s|r has challenged you to a gold duel for |cFFFFD100%s|r.\n\nWinner takes both wagers!",
+        DUEL_POPUP_MAKGORA = BIG_SKULL_ICON .. " |cFFFF1111MAK'GORA (DEATH DUEL)|r\n\n|cFFFFFFFF%s|r has challenged you to a duel to the death!\n\n|cFFFF4444WARNING: The loser suffers permanent character death!|r",
         TYPE_POPUP = "Choose duel type with |cFFFFD100%s|r:",
-        TYPE_NORMAL = "Normal",
+        TYPE_NORMAL = SWORD_ICON .. " Normal",
         TYPE_MONEY = GOLD_ICON .. " Gold",
         TYPE_MAKGORA = SKULL_ICON .. " Mak'gora",
         TIP_NORMAL_TITLE = "Normal Duel",
@@ -34,13 +39,13 @@ local strings = {
     },
     esES = {
         SELECT_PLAYER = "Selecciona un jugador primero.",
-        AMOUNT_POPUP = "Duelo por Oro con |cFFFFD100%s|r\n\n" .. GOLD_ICON .. " Ingresa la cantidad en oro:",
+        AMOUNT_POPUP = BIG_GOLD_ICON .. " Duelo por Oro con |cFFFFD100%s|r\n\nIngresa la cantidad de oro a apostar:",
         ENTER_AMOUNT = "Escribe una cantidad, por ejemplo 10g o 500g.",
         TARGET_NOT_FOUND = "No se pudo encontrar el jugador objetivo.",
-        DUEL_POPUP_GOLD = GOLD_ICON .. " |cFFFFD100DUELO POR ORO|r\n\n|cFFFFFFFF%s|r te ha retado a un duelo de oro por |cFFFFD100%s|r.\n\n¡El ganador se lleva el bote total!",
-        DUEL_POPUP_MAKGORA = SKULL_ICON .. " |cFFFF1111¡DUELO A MUERTE (MAK'GORA)!|r\n\n|cFFFFFFFF%s|r te ha retado a un duelo a muerte.\n\n|cFFFF4444¡ADVERTENCIA: El perdedor morirá de forma permanente y su personaje quedará bloqueado!|r",
+        DUEL_POPUP_GOLD = BIG_GOLD_ICON .. " |cFFFFD100DUELO POR ORO|r\n\n|cFFFFFFFF%s|r te ha retado a un duelo de oro por |cFFFFD100%s|r.\n\n¡El ganador se lleva el bote total!",
+        DUEL_POPUP_MAKGORA = BIG_SKULL_ICON .. " |cFFFF1111¡DUELO A MUERTE (MAK'GORA)!|r\n\n|cFFFFFFFF%s|r te ha retado a un duelo a muerte.\n\n|cFFFF4444¡ADVERTENCIA: El perdedor morirá de forma permanente y su personaje quedará bloqueado!|r",
         TYPE_POPUP = "Elige el tipo de duelo con |cFFFFD100%s|r:",
-        TYPE_NORMAL = "Normal",
+        TYPE_NORMAL = SWORD_ICON .. " Normal",
         TYPE_MONEY = GOLD_ICON .. " Oro",
         TYPE_MAKGORA = SKULL_ICON .. " Mak'gora",
         TIP_NORMAL_TITLE = "Duelo normal",
@@ -68,13 +73,13 @@ local TOOLTIP_SCREEN_PADDING = 8
 
 local DUEL_TYPE_TOOLTIPS = {
     [1] = function()
-        return L.TIP_NORMAL_TITLE, L.TIP_NORMAL_BODY
+        return SWORD_ICON .. " " .. L.TIP_NORMAL_TITLE, L.TIP_NORMAL_BODY
     end,
     [2] = function()
-        return L.TIP_MONEY_TITLE, L.TIP_MONEY_BODY
+        return GOLD_ICON .. " " .. L.TIP_MONEY_TITLE, L.TIP_MONEY_BODY
     end,
     [3] = function()
-        return L.TIP_MAKGORA_TITLE, L.TIP_MAKGORA_BODY
+        return SKULL_ICON .. " " .. L.TIP_MAKGORA_TITLE, L.TIP_MAKGORA_BODY
     end,
 }
 
@@ -211,8 +216,8 @@ local function LayoutDuelTypePopup(popup)
         return
     end
 
-    -- Set wide dialogue frame for perfectly balanced 3-button layout
-    local popupWidth = 430
+    -- Generous dialog sizing with plenty of breathing room between text and buttons
+    local popupWidth = 390
     local popupHeight = 135
     popup:SetWidth(popupWidth)
     popup:SetHeight(popupHeight)
@@ -229,9 +234,10 @@ local function LayoutDuelTypePopup(popup)
     local btn2 = popup.button2 or _G[popup:GetName() .. "Button2"]
     local btn3 = popup.button3 or _G[popup:GetName() .. "Button3"]
 
+    -- Sleek, perfectly proportioned button sizes
     local buttons = { btn1, btn2, btn3 }
-    local btnWidth = 124
-    local btnHeight = 26
+    local btnWidth = 108
+    local btnHeight = 24
     local spacing = 10
     local totalWidth = (btnWidth * 3) + (spacing * 2)
     local startX = (popupWidth - totalWidth) / 2
@@ -266,7 +272,7 @@ local function LayoutAmountPopup(popup)
         return
     end
 
-    local popupWidth = 360
+    local popupWidth = 350
     local popupHeight = 145
     popup:SetWidth(popupWidth)
     popup:SetHeight(popupHeight)
@@ -283,7 +289,7 @@ local function LayoutAmountPopup(popup)
     if editBox then
         editBox:ClearAllPoints()
         editBox:SetPoint("CENTER", popup, "CENTER", 0, -6)
-        editBox:SetWidth(150)
+        editBox:SetWidth(140)
         editBox:SetHeight(22)
         editBox:SetJustifyH("CENTER")
     end
@@ -291,7 +297,7 @@ local function LayoutAmountPopup(popup)
     local btn1 = popup.button1 or _G[popup:GetName() .. "Button1"]
     local btn2 = popup.button2 or _G[popup:GetName() .. "Button2"]
 
-    local btnWidth = 120
+    local btnWidth = 110
     local btnHeight = 24
     local spacing = 16
     local totalWidth = (btnWidth * 2) + spacing
