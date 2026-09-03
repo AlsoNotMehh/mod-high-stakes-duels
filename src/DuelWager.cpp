@@ -16,6 +16,7 @@
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "WorldSessionMgr.h"
 #include "BanMgr.h"
 #include "PlayerScript.h"
 #include "SharedDefines.h"
@@ -1768,7 +1769,7 @@ public:
             std::string const globalAnnouncement = Acore::StringFormat(
                 "|cFFFF0000[Mak'gora]|r |cFFFFD100{}|r (Nivel {}) ha salido victorioso en un Duelo a Muerte contra |cFFFFD100{}|r (Nivel {})! El personaje de |cFFFFFFFF{}|r ha caido para siempre.",
                 winnerName, winnerLevel, loserName, loserLevel, loserName);
-            sWorld->SendServerMessage(SERVER_MSG_STRING, globalAnnouncement.c_str());
+            sWorldSessionMgr->SendServerMessage(SERVER_MSG_STRING, globalAnnouncement);
 
             // 2. Kill the loser completely
             if (loser->IsAlive())
