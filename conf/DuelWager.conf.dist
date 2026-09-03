@@ -1,0 +1,64 @@
+#
+# Duel Wager & Hardcore Death Duel (Mak'gora) Configuration
+#
+
+[worldserver]
+
+#
+#    DuelWager.Enable
+#        Description: Enable the Duel Wager module.
+#        Default:     1 (Enabled)
+#
+
+DuelWager.Enable = 1
+
+#
+#    DuelWager.Gold.Enable
+#        Description: Enable gold wagering on 1v1 duels.
+#                     Players use ".duel gold <amount>" targeting another player.
+#        Default:     1 (Enabled)
+#
+
+DuelWager.Gold.Enable = 1
+
+#
+#    DuelWager.DeathDuel.Enable
+#        Description: Enable Hardcore Death Duels (Mak'gora).
+#                     Players use ".duel death" or ".duel makgora" targeting another player.
+#                     The loser suffers permanent character death and lockout.
+#        Default:     1 (Enabled)
+#
+
+DuelWager.DeathDuel.Enable = 1
+
+#
+#    DuelWager.MinLevel
+#        Description: Minimum player level required to initiate a Death Duel.
+#        Default:     10
+#
+
+DuelWager.MinLevel = 10
+
+#
+#    DuelWager.DeathDuel.AnnounceWinner
+#        Description: Broadcast a server-wide announcement when a Death Duel finishes.
+#        Default:     1 (Enabled)
+#
+
+DuelWager.DeathDuel.AnnounceWinner = 1
+
+#
+#    DuelWager.TimeoutSeconds
+#        Description: Seconds before a pending duel challenge expires.
+#        Default:     60
+#
+
+DuelWager.TimeoutSeconds = 60
+
+#
+#    DuelWager.MaxDistance
+#        Description: Maximum distance in yards allowed between duelists to start.
+#        Default:     30.0
+#
+
+DuelWager.MaxDistance = 30.0
