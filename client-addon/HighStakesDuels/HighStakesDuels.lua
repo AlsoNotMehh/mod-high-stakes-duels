@@ -13,6 +13,7 @@ local BIG_SKULL_ICON = "|TInterface\\Icons\\INV_Misc_Bone_HumanSkull_01:20:20:0:
 
 local activeRequest
 local activeDuelTypeTooltipButton
+local activeDuelTarget
 local originalStartDuel
 local originalUnitPopupOnClick
 
@@ -145,6 +146,30 @@ local function FindDuelRequestPopup()
     end
 end
 
+local function PositionDuelTypeTooltip(button)
+    if not button or not GameTooltip or not GameTooltip:IsShown() then
+        return
+    end
+
+    local cursorX, cursorY = GetCursorPosition()
+    local scale = UIParent:GetEffectiveScale() or 1
+    cursorX = cursorX / scale
+    cursorY = cursorY / scale
+
+    GameTooltip:ClearAllPoints()
+    local offsetX = 16
+    local offsetY = -16
+
+    local tooltipWidth = GameTooltip:GetWidth() or 220
+    local screenWidth = UIParent:GetWidth() or 1024
+
+    if cursorX + offsetX + tooltipWidth > screenWidth - 12 then
+        GameTooltip:SetPoint("TOPRIGHT", UIParent, "BOTTOMLEFT", cursorX - offsetX, cursorY + offsetY)
+    else
+        GameTooltip:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", cursorX + offsetX, cursorY + offsetY)
+    end
+end
+
 local function ShowDuelTypeTooltip(button, buttonIndex)
     local tooltipFunc = DUEL_TYPE_TOOLTIPS[buttonIndex]
     if not tooltipFunc or not button or not GameTooltip then
@@ -157,10 +182,11 @@ local function ShowDuelTypeTooltip(button, buttonIndex)
     end
 
     activeDuelTypeTooltipButton = button
-    GameTooltip:SetOwner(button, "ANCHOR_BOTTOM", 0, -8)
+    GameTooltip:SetOwner(button, "ANCHOR_NONE")
     GameTooltip:ClearLines()
     GameTooltip:AddLine(title, 1.0, 0.82, 0.0)
     GameTooltip:AddLine(body, 1.0, 1.0, 1.0, true)
+    PositionDuelTypeTooltip(button)
     GameTooltip:Show()
 end
 
@@ -176,8 +202,9 @@ local function LayoutDuelTypePopup(popup)
         return
     end
 
-    local popupWidth = 380
-    local popupHeight = 125
+    -- Sized dialog with vertical breathing room
+    local popupWidth = 370
+    local popupHeight = 120
     popup:SetWidth(popupWidth)
     popup:SetHeight(popupHeight)
 
@@ -193,10 +220,11 @@ local function LayoutDuelTypePopup(popup)
     local btn2 = popup.button2 or _G[popup:GetName() .. "Button2"]
     local btn3 = popup.button3 or _G[popup:GetName() .. "Button3"]
 
+    -- Sleek, perfectly proportioned button sizes
     local buttons = { btn1, btn2, btn3 }
-    local btnWidth = 104
-    local btnHeight = 24
-    local spacing = 8
+    local btnWidth = 92
+    local btnHeight = 22
+    local spacing = 10
     local totalWidth = (btnWidth * 3) + (spacing * 2)
     local startX = (popupWidth - totalWidth) / 2
 
@@ -207,7 +235,7 @@ local function LayoutDuelTypePopup(popup)
             button:ClearAllPoints()
 
             if index == 1 then
-                button:SetPoint("BOTTOMLEFT", popup, "BOTTOMLEFT", startX, 18)
+                button:SetPoint("BOTTOMLEFT", popup, "BOTTOMLEFT", startX, 20)
             else
                 button:SetPoint("LEFT", buttons[index - 1], "RIGHT", spacing, 0)
             end
@@ -255,8 +283,8 @@ local function LayoutAmountPopup(popup)
     local btn1 = popup.button1 or _G[popup:GetName() .. "Button1"]
     local btn2 = popup.button2 or _G[popup:GetName() .. "Button2"]
 
-    local btnWidth = 110
-    local btnHeight = 24
+    local btnWidth = 105
+    local btnHeight = 22
     local spacing = 16
     local totalWidth = (btnWidth * 2) + spacing
     local startX = (popupWidth - totalWidth) / 2
@@ -265,7 +293,7 @@ local function LayoutAmountPopup(popup)
         btn1:SetWidth(btnWidth)
         btn1:SetHeight(btnHeight)
         btn1:ClearAllPoints()
-        btn1:SetPoint("BOTTOMLEFT", popup, "BOTTOMLEFT", startX, 16)
+        btn1:SetPoint("BOTTOMLEFT", popup, "BOTTOMLEFT", startX, 18)
     end
 
     if btn2 then
@@ -284,7 +312,9 @@ local function EnsureDuelTypeCloseButton(popup)
     local closeButton = popup.__SSDuelWagerCloseButton
     if not closeButton then
         closeButton = CreateFrame("Button", nil, popup, "UIPanelCloseButton")
-        closeButton:SetPoint("TOPRIGHT", popup, "TOPRIGHT", -3, -3)
+        closeButton:SetWidth(24)
+        closeButton:SetHeight(24)
+        closeButton:SetPoint("TOPRIGHT", popup, "TOPRIGHT", -8, -8)
         closeButton:SetScript("OnClick", function()
             StaticPopup_Hide(POPUP_DUEL_TYPE)
         end)
@@ -369,6 +399,7 @@ local function OpenDuelTypePopup(target)
         return
     end
 
+    activeDuelTarget = target
     StaticPopup_Show(POPUP_DUEL_TYPE, target.name, nil, target)
 end
 
@@ -389,20 +420,62 @@ local function ShowIncomingRequest(challenger, amount, isMakgora)
     UpdateDuelPopup()
 end
 
+local function CheckDuelPopupAutoClose()
+    local isTypeShown = StaticPopup_Visible(POPUP_DUEL_TYPE)
+    local isAmountShown = StaticPopup_Visible(POPUP_AMOUNT)
+
+    if not isTypeShown and not isAmountShown then
+        return
+    end
+
+    -- Auto-close if player dies or enters ghost state
+    if UnitIsDeadOrGhost("player") then
+        if isTypeShown then StaticPopup_Hide(POPUP_DUEL_TYPE) end
+        if isAmountShown then StaticPopup_Hide(POPUP_AMOUNT) end
+        HideDuelTypeTooltip()
+        return
+    end
+
+    -- Check active target validity and distance
+    if activeDuelTarget then
+        local unit = activeDuelTarget.unit or "target"
+        if UnitExists(unit) and UnitIsPlayer(unit) then
+            -- Auto close if target died
+            if UnitIsDeadOrGhost(unit) then
+                if isTypeShown then StaticPopup_Hide(POPUP_DUEL_TYPE) end
+                if isAmountShown then StaticPopup_Hide(POPUP_AMOUNT) end
+                HideDuelTypeTooltip()
+                return
+            end
+
+            -- Out of range check (standard inspect/duel distance ~28-30 yards)
+            if CheckInteractDistance and not CheckInteractDistance(unit, 1) and not CheckInteractDistance(unit, 4) then
+                if isTypeShown then StaticPopup_Hide(POPUP_DUEL_TYPE) end
+                if isAmountShown then StaticPopup_Hide(POPUP_AMOUNT) end
+                HideDuelTypeTooltip()
+                return
+            end
+        end
+    end
+end
+
 StaticPopupDialogs[POPUP_AMOUNT] = {
     text = L.AMOUNT_POPUP,
     button1 = ACCEPT,
     button2 = CANCEL,
     hasEditBox = 1,
     maxLetters = 24,
-    timeout = 0,
-    whileDead = 1,
+    timeout = 60,
+    whileDead = 0,
     hideOnEscape = 1,
     preferredIndex = 3,
     OnShow = function(self)
         LayoutAmountPopup(self)
         self.editBox:SetText("")
         self.editBox:SetFocus()
+    end,
+    OnHide = function()
+        activeDuelTarget = nil
     end,
     OnAccept = function(self, data)
         local amount = Trim(self.editBox:GetText())
@@ -437,8 +510,8 @@ StaticPopupDialogs[POPUP_DUEL_TYPE] = {
     button1 = L.TYPE_NORMAL,
     button2 = L.TYPE_MONEY,
     button3 = L.TYPE_MAKGORA,
-    timeout = 0,
-    whileDead = 1,
+    timeout = 60,
+    whileDead = 0,
     hideOnEscape = 1,
     noCancelOnEscape = 1,
     preferredIndex = 3,
@@ -447,6 +520,7 @@ StaticPopupDialogs[POPUP_DUEL_TYPE] = {
         EnsureDuelTypeCloseButton(self)
     end,
     OnHide = function(self)
+        activeDuelTarget = nil
         HideDuelTypeTooltip()
         HideDuelTypeCloseButton(self)
     end,
@@ -612,5 +686,18 @@ SSDuelWager:RegisterEvent("PLAYER_LOGIN")
 hooksecurefunc("StaticPopup_Show", function(which)
     if which == "DUEL_REQUESTED" then
         UpdateDuelPopup()
+    end
+end)
+
+local updateTimer = 0
+SSDuelWager:SetScript("OnUpdate", function(self, elapsed)
+    if activeDuelTypeTooltipButton and GameTooltip and GameTooltip:IsShown() then
+        PositionDuelTypeTooltip(activeDuelTypeTooltipButton)
+    end
+
+    updateTimer = updateTimer + (elapsed or 0)
+    if updateTimer >= 0.5 then
+        updateTimer = 0
+        CheckDuelPopupAutoClose()
     end
 end)
