@@ -37,6 +37,7 @@ local strings = {
         TIP_MAKGORA_TITLE = "Mak'gora (Death Duel)",
         TIP_MAKGORA_BODY = "High-stakes duel to the death! The loser suffers permanent character death and lockout.",
         MAKGORA_SENT = "Mak'gora duel request sent to %s.",
+        SEND_ERROR = "Could not send the duel request to the server.",
     },
     esES = {
         SELECT_PLAYER = "Selecciona un jugador primero.",
@@ -56,6 +57,7 @@ local strings = {
         TIP_MAKGORA_TITLE = "Mak'gora (Duelo a Muerte)",
         TIP_MAKGORA_BODY = "¡Duelo a muerte de máximo riesgo! El perdedor muere permanentemente y su personaje queda bloqueado.",
         MAKGORA_SENT = "Reto de Mak'gora a muerte enviado a %s.",
+        SEND_ERROR = "No se pudo enviar la solicitud de duelo al servidor.",
     }
 }
 strings.enGB = strings.enUS
@@ -109,7 +111,7 @@ local function SendServerCommand(command)
         end
     end
 
-    Print("Could not send the duel request to the server.")
+    Print(L.SEND_ERROR)
 end
 
 local function Trim(value)
