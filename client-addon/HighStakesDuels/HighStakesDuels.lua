@@ -5,11 +5,11 @@ local POPUP_AMOUNT = "SERVERSYSTEMS_DUEL_AMOUNT_POPUP"
 local POPUP_DUEL_TYPE = "SERVERSYSTEMS_DUEL_TYPE_POPUP"
 
 -- Crisp standard WoW 3.3.5a UI icons
-local SWORD_ICON = "|TInterface\\Icons\\INV_Sword_04:14:14:0:0|t"
-local GOLD_ICON = "|TInterface\\MoneyFrame\\UI-GoldIcon:14:14:0:0|t"
-local SKULL_ICON = "|TInterface\\Icons\\INV_Misc_Bone_HumanSkull_01:14:14:0:0|t"
-local BIG_GOLD_ICON = "|TInterface\\MoneyFrame\\UI-GoldIcon:18:18:0:0|t"
-local BIG_SKULL_ICON = "|TInterface\\Icons\\INV_Misc_Bone_HumanSkull_01:18:18:0:0|t"
+local SWORD_ICON = "|TInterface\\Icons\\INV_Sword_04:16:16:0:0|t"
+local GOLD_ICON = "|TInterface\\MoneyFrame\\UI-GoldIcon:16:16:0:0|t"
+local SKULL_ICON = "|TInterface\\Icons\\INV_Misc_Bone_HumanSkull_01:16:16:0:0|t"
+local BIG_GOLD_ICON = "|TInterface\\MoneyFrame\\UI-GoldIcon:20:20:0:0|t"
+local BIG_SKULL_ICON = "|TInterface\\Icons\\INV_Misc_Bone_HumanSkull_01:20:20:0:0|t"
 
 local activeRequest
 local activeDuelTypeTooltipButton
@@ -26,9 +26,9 @@ local strings = {
         DUEL_POPUP_GOLD = BIG_GOLD_ICON .. " |cFFFFD100GOLD WAGER DUEL|r\n\n|cFFFFFFFF%s|r has challenged you to a gold duel for |cFFFFD100%s|r.\n\nWinner takes both wagers!",
         DUEL_POPUP_MAKGORA = BIG_SKULL_ICON .. " |cFFFF1111MAK'GORA (DEATH DUEL)|r\n\n|cFFFFFFFF%s|r has challenged you to a duel to the death!\n\n|cFFFF4444WARNING: The loser suffers permanent character death!|r",
         TYPE_POPUP = "Choose duel type with |cFFFFD100%s|r:",
-        TYPE_NORMAL = SWORD_ICON .. " Normal",
-        TYPE_MONEY = GOLD_ICON .. " Gold",
-        TYPE_MAKGORA = SKULL_ICON .. " Mak'gora",
+        TYPE_NORMAL = "Normal",
+        TYPE_MONEY = "Gold",
+        TYPE_MAKGORA = "Mak'gora",
         TIP_NORMAL_TITLE = "Normal Duel",
         TIP_NORMAL_BODY = "Challenge the player to a standard friendly duel. No gold is wagered and nobody dies.",
         TIP_MONEY_TITLE = "Gold Wager Duel",
@@ -45,9 +45,9 @@ local strings = {
         DUEL_POPUP_GOLD = BIG_GOLD_ICON .. " |cFFFFD100DUELO POR ORO|r\n\n|cFFFFFFFF%s|r te ha retado a un duelo de oro por |cFFFFD100%s|r.\n\n¡El ganador se lleva el bote total!",
         DUEL_POPUP_MAKGORA = BIG_SKULL_ICON .. " |cFFFF1111¡DUELO A MUERTE (MAK'GORA)!|r\n\n|cFFFFFFFF%s|r te ha retado a un duelo a muerte.\n\n|cFFFF4444¡ADVERTENCIA: El perdedor morirá de forma permanente y su personaje quedará bloqueado!|r",
         TYPE_POPUP = "Elige el tipo de duelo con |cFFFFD100%s|r:",
-        TYPE_NORMAL = SWORD_ICON .. " Normal",
-        TYPE_MONEY = GOLD_ICON .. " Oro",
-        TYPE_MAKGORA = SKULL_ICON .. " Mak'gora",
+        TYPE_NORMAL = "Normal",
+        TYPE_MONEY = "Oro",
+        TYPE_MAKGORA = "Mak'gora",
         TIP_NORMAL_TITLE = "Duelo normal",
         TIP_NORMAL_BODY = "Reta al jugador a un duelo amistoso estándar sin apuestas ni riesgos.",
         TIP_MONEY_TITLE = "Duelo por Oro",
@@ -67,9 +67,6 @@ strings.esMX = strings.esES
 strings.ruRU = strings.enUS
 
 local L = strings[locale] or strings.enUS
-local TOOLTIP_CURSOR_OFFSET_X = 18
-local TOOLTIP_CURSOR_OFFSET_Y = 18
-local TOOLTIP_SCREEN_PADDING = 8
 
 local DUEL_TYPE_TOOLTIPS = {
     [1] = function()
@@ -148,43 +145,6 @@ local function FindDuelRequestPopup()
     end
 end
 
-local function PositionDuelTypeTooltip(button)
-    if not button or not GameTooltip then
-        return
-    end
-
-    local cursorX, cursorY = GetCursorPosition()
-    local scale = UIParent:GetEffectiveScale() or 1
-    cursorX = cursorX / scale
-    cursorY = cursorY / scale
-
-    GameTooltip:ClearAllPoints()
-    local tooltipWidth = GameTooltip:GetWidth() or 0
-    local screenWidth = UIParent:GetWidth() or 0
-
-    if cursorX + TOOLTIP_CURSOR_OFFSET_X + tooltipWidth > screenWidth - TOOLTIP_SCREEN_PADDING then
-        GameTooltip:SetPoint(
-            "BOTTOMRIGHT",
-            UIParent,
-            "BOTTOMLEFT",
-            cursorX - TOOLTIP_CURSOR_OFFSET_X,
-            cursorY - TOOLTIP_CURSOR_OFFSET_Y)
-    else
-        GameTooltip:SetPoint(
-            "BOTTOMLEFT",
-            UIParent,
-            "BOTTOMLEFT",
-            cursorX + TOOLTIP_CURSOR_OFFSET_X,
-            cursorY - TOOLTIP_CURSOR_OFFSET_Y)
-    end
-end
-
-local function UpdateDuelTypeTooltipPosition()
-    if activeDuelTypeTooltipButton and GameTooltip and GameTooltip:IsShown() then
-        PositionDuelTypeTooltip(activeDuelTypeTooltipButton)
-    end
-end
-
 local function ShowDuelTypeTooltip(button, buttonIndex)
     local tooltipFunc = DUEL_TYPE_TOOLTIPS[buttonIndex]
     if not tooltipFunc or not button or not GameTooltip then
@@ -197,8 +157,8 @@ local function ShowDuelTypeTooltip(button, buttonIndex)
     end
 
     activeDuelTypeTooltipButton = button
-    GameTooltip:SetOwner(button, "ANCHOR_NONE")
-    PositionDuelTypeTooltip(button)
+    GameTooltip:SetOwner(button, "ANCHOR_BOTTOM", 0, -8)
+    GameTooltip:ClearLines()
     GameTooltip:AddLine(title, 1.0, 0.82, 0.0)
     GameTooltip:AddLine(body, 1.0, 1.0, 1.0, true)
     GameTooltip:Show()
@@ -216,9 +176,8 @@ local function LayoutDuelTypePopup(popup)
         return
     end
 
-    -- Generous dialog sizing with plenty of breathing room between text and buttons
-    local popupWidth = 390
-    local popupHeight = 135
+    local popupWidth = 380
+    local popupHeight = 125
     popup:SetWidth(popupWidth)
     popup:SetHeight(popupHeight)
 
@@ -234,11 +193,10 @@ local function LayoutDuelTypePopup(popup)
     local btn2 = popup.button2 or _G[popup:GetName() .. "Button2"]
     local btn3 = popup.button3 or _G[popup:GetName() .. "Button3"]
 
-    -- Sleek, perfectly proportioned button sizes
     local buttons = { btn1, btn2, btn3 }
-    local btnWidth = 108
+    local btnWidth = 104
     local btnHeight = 24
-    local spacing = 10
+    local spacing = 8
     local totalWidth = (btnWidth * 3) + (spacing * 2)
     local startX = (popupWidth - totalWidth) / 2
 
@@ -348,15 +306,28 @@ local function UpdateDuelPopup()
     end
 
     local popup = FindDuelRequestPopup()
-    local textRegion = GetPopupTextRegion(popup)
-    if textRegion then
-        textRegion:SetJustifyH("CENTER")
-        if activeRequest.isMakgora then
-            textRegion:SetText(string.format(L.DUEL_POPUP_MAKGORA, activeRequest.challenger))
-        else
-            textRegion:SetText(string.format(L.DUEL_POPUP_GOLD, activeRequest.challenger, activeRequest.amount))
-        end
+    if not popup then
+        return
     end
+
+    local textRegion = GetPopupTextRegion(popup)
+    if not textRegion then
+        return
+    end
+
+    if activeRequest.isMakgora then
+        textRegion:SetText(string.format(L.DUEL_POPUP_MAKGORA, activeRequest.challenger))
+    else
+        textRegion:SetText(string.format(
+            L.DUEL_POPUP_GOLD,
+            activeRequest.challenger,
+            activeRequest.amount
+        ))
+    end
+
+    local textHeight = textRegion:GetStringHeight() or 60
+    popup:SetHeight(math.max(140, textHeight + 70))
+    popup:SetWidth(360)
 end
 
 local function OpenAmountPopup(targetName)
@@ -642,8 +613,4 @@ hooksecurefunc("StaticPopup_Show", function(which)
     if which == "DUEL_REQUESTED" then
         UpdateDuelPopup()
     end
-end)
-
-SSDuelWager:SetScript("OnUpdate", function()
-    UpdateDuelTypeTooltipPosition()
 end)
