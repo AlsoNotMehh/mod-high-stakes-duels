@@ -202,16 +202,16 @@ local function LayoutDuelTypePopup(popup)
         return
     end
 
-    -- Sized dialog with vertical breathing room
-    local popupWidth = 370
-    local popupHeight = 120
+    -- Compact proportional dimensions with ample vertical breathing room
+    local popupWidth = 340
+    local popupHeight = 115
     popup:SetWidth(popupWidth)
     popup:SetHeight(popupHeight)
 
     local textRegion = GetPopupTextRegion(popup)
     if textRegion then
         textRegion:ClearAllPoints()
-        textRegion:SetPoint("TOP", popup, "TOP", 0, -22)
+        textRegion:SetPoint("TOP", popup, "TOP", 0, -20)
         textRegion:SetWidth(popupWidth - 40)
         textRegion:SetJustifyH("CENTER")
     end
@@ -220,11 +220,11 @@ local function LayoutDuelTypePopup(popup)
     local btn2 = popup.button2 or _G[popup:GetName() .. "Button2"]
     local btn3 = popup.button3 or _G[popup:GetName() .. "Button3"]
 
-    -- Sleek, perfectly proportioned button sizes
+    -- Sleek, proportioned smaller buttons
     local buttons = { btn1, btn2, btn3 }
-    local btnWidth = 92
+    local btnWidth = 86
     local btnHeight = 22
-    local spacing = 10
+    local spacing = 8
     local totalWidth = (btnWidth * 3) + (spacing * 2)
     local startX = (popupWidth - totalWidth) / 2
 
@@ -235,7 +235,7 @@ local function LayoutDuelTypePopup(popup)
             button:ClearAllPoints()
 
             if index == 1 then
-                button:SetPoint("BOTTOMLEFT", popup, "BOTTOMLEFT", startX, 20)
+                button:SetPoint("BOTTOMLEFT", popup, "BOTTOMLEFT", startX, 16)
             else
                 button:SetPoint("LEFT", buttons[index - 1], "RIGHT", spacing, 0)
             end
@@ -258,15 +258,15 @@ local function LayoutAmountPopup(popup)
         return
     end
 
-    local popupWidth = 350
-    local popupHeight = 145
+    local popupWidth = 330
+    local popupHeight = 135
     popup:SetWidth(popupWidth)
     popup:SetHeight(popupHeight)
 
     local textRegion = GetPopupTextRegion(popup)
     if textRegion then
         textRegion:ClearAllPoints()
-        textRegion:SetPoint("TOP", popup, "TOP", 0, -20)
+        textRegion:SetPoint("TOP", popup, "TOP", 0, -18)
         textRegion:SetWidth(popupWidth - 30)
         textRegion:SetJustifyH("CENTER")
     end
@@ -274,18 +274,18 @@ local function LayoutAmountPopup(popup)
     local editBox = popup.editBox or _G[popup:GetName() .. "EditBox"]
     if editBox then
         editBox:ClearAllPoints()
-        editBox:SetPoint("CENTER", popup, "CENTER", 0, -6)
-        editBox:SetWidth(140)
-        editBox:SetHeight(22)
+        editBox:SetPoint("CENTER", popup, "CENTER", 0, -4)
+        editBox:SetWidth(130)
+        editBox:SetHeight(20)
         editBox:SetJustifyH("CENTER")
     end
 
     local btn1 = popup.button1 or _G[popup:GetName() .. "Button1"]
     local btn2 = popup.button2 or _G[popup:GetName() .. "Button2"]
 
-    local btnWidth = 105
+    local btnWidth = 95
     local btnHeight = 22
-    local spacing = 16
+    local spacing = 14
     local totalWidth = (btnWidth * 2) + spacing
     local startX = (popupWidth - totalWidth) / 2
 
@@ -293,7 +293,7 @@ local function LayoutAmountPopup(popup)
         btn1:SetWidth(btnWidth)
         btn1:SetHeight(btnHeight)
         btn1:ClearAllPoints()
-        btn1:SetPoint("BOTTOMLEFT", popup, "BOTTOMLEFT", startX, 18)
+        btn1:SetPoint("BOTTOMLEFT", popup, "BOTTOMLEFT", startX, 16)
     end
 
     if btn2 then
@@ -314,13 +314,14 @@ local function EnsureDuelTypeCloseButton(popup)
         closeButton = CreateFrame("Button", nil, popup, "UIPanelCloseButton")
         closeButton:SetWidth(24)
         closeButton:SetHeight(24)
-        closeButton:SetPoint("TOPRIGHT", popup, "TOPRIGHT", -8, -8)
         closeButton:SetScript("OnClick", function()
             StaticPopup_Hide(POPUP_DUEL_TYPE)
         end)
         popup.__SSDuelWagerCloseButton = closeButton
     end
 
+    closeButton:ClearAllPoints()
+    closeButton:SetPoint("TOPRIGHT", popup, "TOPRIGHT", -5, -5)
     closeButton:Show()
 end
 
@@ -356,8 +357,8 @@ local function UpdateDuelPopup()
     end
 
     local textHeight = textRegion:GetStringHeight() or 60
-    popup:SetHeight(math.max(140, textHeight + 70))
-    popup:SetWidth(360)
+    popup:SetHeight(math.max(130, textHeight + 65))
+    popup:SetWidth(340)
 end
 
 local function OpenAmountPopup(targetName)
@@ -686,6 +687,21 @@ SSDuelWager:RegisterEvent("PLAYER_LOGIN")
 hooksecurefunc("StaticPopup_Show", function(which)
     if which == "DUEL_REQUESTED" then
         UpdateDuelPopup()
+    elseif which == POPUP_DUEL_TYPE then
+        for index = 1, STATICPOPUP_NUMDIALOGS or 4 do
+            local popup = _G["StaticPopup" .. index]
+            if popup and popup:IsShown() and popup.which == POPUP_DUEL_TYPE then
+                LayoutDuelTypePopup(popup)
+                EnsureDuelTypeCloseButton(popup)
+            end
+        end
+    elseif which == POPUP_AMOUNT then
+        for index = 1, STATICPOPUP_NUMDIALOGS or 4 do
+            local popup = _G["StaticPopup" .. index]
+            if popup and popup:IsShown() and popup.which == POPUP_AMOUNT then
+                LayoutAmountPopup(popup)
+            end
+        end
     end
 end)
 
